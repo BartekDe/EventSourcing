@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\PartnerRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=PartnerRepository::class)
@@ -19,28 +20,42 @@ class Partner
 
     /**
      * @ORM\Column(type="string", length=64)
+     * @Assert\NotBlank
+     * @Assert\Length(max = 64)
      */
     private $name;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank
+     * @Assert\Length(max = 255)
      */
     private $description;
 
     /**
      * @ORM\Column(type="string", length=10)
+     * @Assert\NotBlank
+     * @Assert\Length(10)
      */
     private $nip;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Assert\NotBlank(allowNull = true)
+     * @Assert\Length(max = 255)
      */
     private $webpage;
 
     /**
      * @ORM\Column(type="datetime_immutable")
+     * @Assert\Type("\DateTimeImmutable")
      */
     private $creationTime;
+
+    public function __construct()
+    {
+        $this->creationTime = new \DateTimeImmutable();
+    }
 
     public function getId(): ?int
     {
