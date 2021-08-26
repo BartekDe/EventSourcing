@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Dto\PartnerDto;
 use App\Entity\Partner;
 use App\Form\PartnerType;
+use App\Repository\PartnerRepository;
 use App\Util\JsonUtil;
 use App\Util\PartnerService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -43,6 +44,15 @@ class PartnerController extends AbstractFOSRestController
         } else {
             return $this->handleErrors($form);
         }
+    }
+
+    /**
+     * @Rest\Get("/partner")
+     */
+    public function getPartnersAction(PartnerRepository $partnerRepository)
+    {
+        $partners = $partnerRepository->findAll();
+        return $this->handleView($this->view($partners, Response::HTTP_OK));
     }
 
     private function handleErrors(FormInterface $form): Response
