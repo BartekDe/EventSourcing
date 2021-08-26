@@ -29,6 +29,6 @@ class PartnerDto
      * @Assert\NotBlank(allowNull = true)
      * @Assert\Length(max = 255)
      */
-    public string $webpage;
+    public ?string $webpage = null;
 
 }

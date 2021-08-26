@@ -22,7 +22,7 @@ class PartnerWasCreated extends AggregateChanged
         return $this->payload['nip'];
     }
 
-    public function webpage(): string
+    public function webpage(): ?string
     {
         return $this->payload['webpage'];
     }

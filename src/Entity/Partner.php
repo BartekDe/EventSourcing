@@ -48,7 +48,7 @@ class Partner extends AggregateRoot
      * @Assert\NotBlank(allowNull = true)
      * @Assert\Length(max = 255)
      */
-    private string $webpage;
+    private ?string $webpage;
 
     /**
      * @ORM\Column(type="datetime_immutable")
