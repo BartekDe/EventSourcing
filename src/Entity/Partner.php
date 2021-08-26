@@ -2,123 +2,102 @@
 
 namespace App\Entity;
 
+use App\Event\Partner\PartnerWasCreated;
 use App\Repository\PartnerRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Prooph\EventSourcing\AggregateChanged;
+use Prooph\EventSourcing\AggregateRoot;
+use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=PartnerRepository::class)
  */
-class Partner
+class Partner extends AggregateRoot
 {
     /**
      * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="uuid")
      */
-    private $id;
+    private UuidInterface $uuid;
 
     /**
      * @ORM\Column(type="string", length=64)
      * @Assert\NotBlank
      * @Assert\Length(max = 64)
      */
-    private $name;
+    private string $name;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank
      * @Assert\Length(max = 255)
      */
-    private $description;
+    private string $description;
 
     /**
      * @ORM\Column(type="string", length=10)
      * @Assert\NotBlank
      * @Assert\Length(10)
      */
-    private $nip;
+    private string $nip;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      * @Assert\NotBlank(allowNull = true)
      * @Assert\Length(max = 255)
      */
-    private $webpage;
+    private string $webpage;
 
     /**
      * @ORM\Column(type="datetime_immutable")
      * @Assert\Type("\DateTimeImmutable")
      */
-    private $creationTime;
+    private \DateTimeImmutable $creationTime;
 
-    public function __construct()
+    public static function createNew(
+        string  $name,
+        string  $description,
+        string  $nip,
+        ?string $webpage = null
+    ): Partner
     {
-        $this->creationTime = new \DateTimeImmutable();
+        $uuid = Uuid::uuid4();
+
+        $instance = new self();
+        $instance->creationTime = new \DateTimeImmutable();
+
+        $instance->recordThat(PartnerWasCreated::occur(
+            $uuid->toString(),
+            [
+                'name' => $name,
+                'description' => $description,
+                'nip' => $nip,
+                'webpage' => $webpage
+            ]
+        ));
+
+        return $instance;
     }
 
-    public function getId(): ?int
+    protected function aggregateId(): string
     {
-        return $this->id;
+        return $this->uuid->toString();
     }
 
-    public function getName(): ?string
+    protected function apply(AggregateChanged $event): void
     {
-        return $this->name;
-    }
-
-    public function setName(string $name): self
-    {
-        $this->name = $name;
-
-        return $this;
-    }
-
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
-    public function setDescription(string $description): self
-    {
-        $this->description = $description;
-
-        return $this;
-    }
-
-    public function getNip(): ?string
-    {
-        return $this->nip;
-    }
-
-    public function setNip(string $nip): self
-    {
-        $this->nip = $nip;
-
-        return $this;
-    }
-
-    public function getWebpage(): ?string
-    {
-        return $this->webpage;
-    }
-
-    public function setWebpage(?string $webpage): self
-    {
-        $this->webpage = $webpage;
-
-        return $this;
-    }
-
-    public function getCreationTime(): ?\DateTimeImmutable
-    {
-        return $this->creationTime;
-    }
-
-    public function setCreationTime(\DateTimeImmutable $creationTime): self
-    {
-        $this->creationTime = $creationTime;
-
-        return $this;
+        switch (get_class($event)) {
+            case PartnerWasCreated::class:
+                $this->uuid = Uuid::fromString($event->aggregateId());
+                $this->name = $event->name();
+                $this->description = $event->description();
+                $this->nip = $event->nip();
+                $this->webpage = $event->webpage();
+                break;
+            default:
+                throw new \RuntimeException(sprintf('Unknown event type %s', get_class($event)));
+        }
     }
 }

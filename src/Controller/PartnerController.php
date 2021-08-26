@@ -2,9 +2,11 @@
 
 namespace App\Controller;
 
+use App\Dto\PartnerDto;
 use App\Entity\Partner;
 use App\Form\PartnerType;
 use App\Util\JsonUtil;
+use App\Util\PartnerService;
 use Doctrine\ORM\EntityManagerInterface;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use JMS\Serializer\Serializer;
@@ -18,35 +20,29 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 class PartnerController extends AbstractFOSRestController
 {
 
-    private $jsonUtil;
-    private $entityManager;
+    private JsonUtil $jsonUtil;
 
-    public function __construct(JsonUtil $jsonUtil, EntityManagerInterface $entityManager)
+    public function __construct(JsonUtil $jsonUtil)
     {
         $this->jsonUtil = $jsonUtil;
-        $this->entityManager = $entityManager;
     }
 
     /**
      * @Rest\Post("/partner")
      */
-    public function createPartnerAction(Request $request): Response
+    public function createPartnerAction(Request $request, PartnerService $partnerService): Response
     {
-        $partner = new Partner();
+        $partnerDto = new PartnerDto();
 
-        $form = $this->createForm(PartnerType::class, $partner);
+        $form = $this->createForm(PartnerType::class, $partnerDto);
         $form->submit($this->jsonUtil->getJson($request));
 
         if ($form->isValid()) {
-            $this->entityManager->persist($partner);
-            $this->entityManager->flush();
+            $partner = $partnerService->createAndSavePartner($partnerDto);
+            return $this->handleView($this->view($partner, Response::HTTP_OK));
         } else {
             return $this->handleErrors($form);
         }
-
-        return $this->handleView(
-            $this->view($partner, Response::HTTP_OK)
-        );
     }
 
     private function handleErrors(FormInterface $form): Response
