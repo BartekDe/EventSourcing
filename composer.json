@@ -4,7 +4,7 @@
     "minimum-stability": "stable",
     "prefer-stable": true,
     "require": {
-        "php": ">=7.2.5",
+        "php": ">=7.4",
         "ext-ctype": "*",
         "ext-iconv": "*",
         "composer/package-versions-deprecated": "1.11.99.3",
@@ -14,6 +14,8 @@
         "friendsofsymfony/rest-bundle": "^3.0",
         "jms/serializer-bundle": "^3.10",
         "prooph/event-sourcing": "^5.7",
+        "prooph/event-store": "^7.6",
+        "prooph/pdo-event-store": "^1.13",
         "ramsey/uuid-doctrine": "^1.7",
         "symfony/console": "5.3.*",
         "symfony/dotenv": "5.3.*",

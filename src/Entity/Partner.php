@@ -3,7 +3,7 @@
 namespace App\Entity;
 
 use App\Event\Partner\PartnerWasCreated;
-use App\Repository\PartnerRepository;
+use App\Repository\Doctrine\PartnerDoctrineRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Prooph\EventSourcing\AggregateChanged;
 use Prooph\EventSourcing\AggregateRoot;
@@ -24,37 +24,28 @@ class Partner extends AggregateRoot
 
     /**
      * @ORM\Column(type="string", length=64)
-     * @Assert\NotBlank
-     * @Assert\Length(max = 64)
      */
     private string $name;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Assert\NotBlank
-     * @Assert\Length(max = 255)
      */
     private string $description;
 
     /**
      * @ORM\Column(type="string", length=10)
-     * @Assert\NotBlank
-     * @Assert\Length(10)
      */
     private string $nip;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
-     * @Assert\NotBlank(allowNull = true)
-     * @Assert\Length(max = 255)
      */
     private ?string $webpage;
 
     /**
-     * @ORM\Column(type="datetime_immutable")
-     * @Assert\Type("\DateTimeImmutable")
+     * @ORM\Column(type="datetime")
      */
-    private \DateTimeImmutable $creationTime;
+    private ?\DateTime $creationTime = null;
 
     public static function createNew(
         string  $name,
@@ -66,7 +57,7 @@ class Partner extends AggregateRoot
         $uuid = Uuid::uuid4();
 
         $instance = new self();
-        $instance->creationTime = new \DateTimeImmutable();
+        $instance->creationTime = new \DateTime();
 
         $instance->recordThat(PartnerWasCreated::occur(
             $uuid->toString(),
@@ -100,4 +91,13 @@ class Partner extends AggregateRoot
                 throw new \RuntimeException(sprintf('Unknown event type %s', get_class($event)));
         }
     }
+
+    /**
+     * @return UuidInterface
+     */
+    public function getUuid(): UuidInterface
+    {
+        return $this->uuid;
+    }
+
 }

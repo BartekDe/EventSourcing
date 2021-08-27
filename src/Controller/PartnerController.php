@@ -5,7 +5,9 @@ namespace App\Controller;
 use App\Dto\PartnerDto;
 use App\Entity\Partner;
 use App\Form\PartnerType;
-use App\Repository\PartnerRepository;
+use App\Repository\Aggregate\PartnerAggregateRepository;
+use App\Repository\Doctrine\PartnerDoctrineRepository;
+use App\Repository\Doctrine\PartnerRepository;
 use App\Util\JsonUtil;
 use App\Util\PartnerService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -49,10 +51,18 @@ class PartnerController extends AbstractFOSRestController
     /**
      * @Rest\Get("/partner")
      */
-    public function getPartnersAction(PartnerRepository $partnerRepository)
+    public function getPartnersAction(
+        PartnerDoctrineRepository $partnerRepository,
+        PartnerAggregateRepository $aggregateRepository
+    ): Response
     {
         $partners = $partnerRepository->findAll();
-        return $this->handleView($this->view($partners, Response::HTTP_OK));
+        $aggregates = [];
+        foreach ($partners as $partner) {
+            $aggregates[] = $aggregateRepository->get($partner->getUuid()->toString());
+
+        }
+        return $this->handleView($this->view($aggregates, Response::HTTP_OK));
     }
 
     private function handleErrors(FormInterface $form): Response
