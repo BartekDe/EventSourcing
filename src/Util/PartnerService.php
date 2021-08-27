@@ -5,21 +5,19 @@ namespace App\Util;
 use App\Dto\PartnerDto;
 use App\Entity\Partner;
 use App\Repository\Aggregate\PartnerAggregateRepository;
+use App\Repository\PartnerRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
 class PartnerService
 {
 
-    private EntityManagerInterface $entityManager;
-    private PartnerAggregateRepository $aggregateRepository;
+    private PartnerRepository $partnerRepository;
 
     public function __construct(
-        EntityManagerInterface $entityManager,
-        PartnerAggregateRepository $aggregateRepository
+        PartnerRepository $partnerRepository
     )
     {
-        $this->entityManager = $entityManager;
-        $this->aggregateRepository = $aggregateRepository;
+        $this->partnerRepository = $partnerRepository;
     }
 
     public function createAndSavePartner(PartnerDto $partnerDto): Partner
@@ -30,20 +28,10 @@ class PartnerService
             $partnerDto->nip,
             $partnerDto->webpage
         );
-        dump($partner);
 
-        $this->aggregateRepository->save($partner);
-//        dump($partner);
-
-//        $this->save($partner);
+        $this->partnerRepository->save($partner);
 
         return $partner;
-    }
-
-    private function save(Partner $partner)
-    {
-        $this->entityManager->persist($partner);
-        $this->entityManager->flush();
     }
 
 }

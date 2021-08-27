@@ -23,7 +23,7 @@ class PartnerAggregateRepository extends AggregateRepository
         $eventStore = new ActionEventEmitterEventStore(
             new PostgresEventStore(
                 new FQCNMessageFactory(),
-                new \PDO('pgsql:host=localhost;port=5432;dbname=partner;user=postgres;password=admin'),
+                new \PDO('pgsql:host=localhost;port=5432;dbname=partner;user=postgres;password=postgres'),
                 new PostgresSingleStreamStrategy()
             ),
             new ProophActionEventEmitter()
