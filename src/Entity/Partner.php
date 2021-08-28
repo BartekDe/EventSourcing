@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Event\Partner\PartnerNameChanged;
 use App\Event\Partner\PartnerWasCreated;
 use App\Repository\Doctrine\PartnerDoctrineRepository;
 use Doctrine\ORM\Mapping as ORM;
@@ -72,6 +73,19 @@ class Partner extends AggregateRoot
         return $instance;
     }
 
+    public function changeName(string $newName)
+    {
+        if ($this->name != $newName) {
+            $this->recordThat(PartnerNameChanged::occur(
+                $this->uuid->toString(),
+                [
+                    'newName' => $newName,
+                    'oldName' => $this->name
+                ]
+            ));
+        }
+    }
+
     protected function aggregateId(): string
     {
         return $this->uuid->toString();
@@ -86,6 +100,9 @@ class Partner extends AggregateRoot
                 $this->description = $event->description();
                 $this->nip = $event->nip();
                 $this->webpage = $event->webpage();
+                break;
+            case PartnerNameChanged::class:
+                $this->name = $event->newName();
                 break;
             default:
                 throw new \RuntimeException(sprintf('Unknown event type %s', get_class($event)));

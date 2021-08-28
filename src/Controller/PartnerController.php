@@ -3,22 +3,15 @@
 namespace App\Controller;
 
 use App\Dto\PartnerDto;
-use App\Entity\Partner;
 use App\Form\PartnerType;
-use App\Repository\Aggregate\PartnerAggregateRepository;
 use App\Repository\Doctrine\PartnerDoctrineRepository;
-use App\Repository\Doctrine\PartnerRepository;
 use App\Util\JsonUtil;
 use App\Util\PartnerService;
-use Doctrine\ORM\EntityManagerInterface;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
-use JMS\Serializer\Serializer;
-use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
-use FOS\RestBundle\Controller\Annotations as Rest;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\HttpException;
+
 
 class PartnerController extends AbstractFOSRestController
 {
@@ -51,18 +44,40 @@ class PartnerController extends AbstractFOSRestController
     /**
      * @Rest\Get("/partner")
      */
-    public function getPartnersAction(
-        PartnerDoctrineRepository $partnerRepository,
-        PartnerAggregateRepository $aggregateRepository
-    ): Response
+    public function getPartnersAction(PartnerDoctrineRepository $partnerRepository): Response
     {
         $partners = $partnerRepository->findAll();
-        $aggregates = [];
-        foreach ($partners as $partner) {
-            $aggregates[] = $aggregateRepository->get($partner->getUuid()->toString());
+        return $this->handleView($this->view($partners, Response::HTTP_OK));
+    }
 
+    /**
+     * @Rest\Put("/partner/{uuid}")
+     */
+    public function updatePartnerAction(
+        string $uuid,
+        Request $request,
+        PartnerDoctrineRepository $partnerRepository,
+        PartnerService $partnerService
+    ): Response
+    {
+        $partner = $partnerRepository->find($uuid);
+
+        if (empty($partner)) {
+            return $this->handleView($this->view(
+                'Partner with id ' . $uuid . 'does not exist',
+                Response::HTTP_NOT_FOUND
+            ));
         }
-        return $this->handleView($this->view($aggregates, Response::HTTP_OK));
+
+        $partnerDto = new PartnerDto();
+
+        $form = $this->createForm(PartnerType::class, $partnerDto);
+        $form->submit($this->jsonUtil->getJson($request));
+
+        $partnerService->updatePartner($partner, $partnerDto);
+
+        return $this->handleView($this->view($partner, Response::HTTP_OK));
+
     }
 
     private function handleErrors(FormInterface $form): Response

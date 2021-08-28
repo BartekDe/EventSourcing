@@ -34,4 +34,9 @@ class PartnerService
         return $partner;
     }
 
+    public function updatePartner(Partner $partner, PartnerDto $partnerDto)
+    {
+        $partner->changeName($partnerDto->name);
+    }
+
 }
