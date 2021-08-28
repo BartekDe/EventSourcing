@@ -7,8 +7,11 @@
 
 ###How to start
 1. `composer install`
-2. `php bin/console create:event-stream`
-3. `symfony serve`
+2. Set up environment variables in `.env` file - both `DATABASE_URL` and `POSTGRES_DSN` can point to the same database
+3. `php bin/console doctrine:database:create`
+4. `php bin/console doctrine:migrations:migrate`
+5. `php bin/console create:event-stream`
+6. `symfony serve`
 
 ###Description
 Event sourcing for the Partner entity. <br>
