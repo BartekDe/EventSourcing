@@ -75,10 +75,12 @@ class PartnerController extends AbstractFOSRestController
         $form = $this->createForm(PartnerType::class, $partnerDto);
         $form->submit($this->jsonUtil->getJson($request));
 
-        $partnerService->updatePartner($partner, $partnerDto);
-
-        return $this->handleView($this->view($partner, Response::HTTP_OK));
-
+        if ($form->isValid()) {
+            $partnerService->updatePartner($partner, $partnerDto);
+            return $this->handleView($this->view($partner, Response::HTTP_OK));
+        } else {
+            return $this->handleErrors($form);
+        }
     }
 
     private function handleErrors(FormInterface $form): Response
@@ -90,7 +92,7 @@ class PartnerController extends AbstractFOSRestController
 
         return $this->handleView(
             $this->view(
-                $this->handleErrors($form),
+                $errors,
                 Response::HTTP_BAD_REQUEST
             )
         );

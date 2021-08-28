@@ -38,6 +38,8 @@ class PartnerService
     {
         $partner->changeName($partnerDto->name);
         $partner->changeDescription($partnerDto->description);
+        $partner->changeNip($partnerDto->nip);
+        $partner->changeWebpage($partnerDto->webpage);
         $this->partnerRepository->update($partner, $partnerDto);
     }
 

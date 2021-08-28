@@ -4,7 +4,9 @@ namespace App\Entity;
 
 use App\Event\Partner\PartnerDescriptionChanged;
 use App\Event\Partner\PartnerNameChanged;
+use App\Event\Partner\PartnerNipChanged;
 use App\Event\Partner\PartnerWasCreated;
+use App\Event\Partner\PartnerWebpageChanged;
 use App\Repository\Doctrine\PartnerDoctrineRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Prooph\EventSourcing\AggregateChanged;
@@ -105,6 +107,32 @@ class Partner extends AggregateRoot
         }
     }
 
+    public function changeNip(string $newNip)
+    {
+        if ($this->nip != $newNip) {
+            $this->recordThat(PartnerNipChanged::occur(
+                $this->uuid->toString(),
+                [
+                    'newNip' => $newNip,
+                    'oldNip' => $this->nip
+                ]
+            ));
+        }
+    }
+
+    public function changeWebpage(string $newWebpage)
+    {
+        if ($this->webpage != $newWebpage) {
+            $this->recordThat(PartnerWebpageChanged::occur(
+                $this->uuid->toString(),
+                [
+                    'newWebpage' => $newWebpage,
+                    'oldWebpage' => $this->webpage
+                ]
+            ));
+        }
+    }
+
     protected function aggregateId(): string
     {
         return $this->uuid->toString();
@@ -125,6 +153,12 @@ class Partner extends AggregateRoot
                 break;
             case PartnerDescriptionChanged::class:
                 $this->description = $event->newDescription();
+                break;
+            case PartnerNipChanged::class:
+                $this->nip = $event->newNip();
+                break;
+            case PartnerWebpageChanged::class:
+                $this->webpage = $event->newWebpage();
                 break;
             default:
                 throw new \RuntimeException(sprintf('Unknown event type %s', get_class($event)));
