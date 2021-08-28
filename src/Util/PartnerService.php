@@ -43,4 +43,9 @@ class PartnerService
         $this->partnerRepository->update($partner, $partnerDto);
     }
 
+    public function getPartnerEvents(string $uuid): array
+    {
+        return $this->partnerRepository->getEvents($uuid);
+    }
+
 }

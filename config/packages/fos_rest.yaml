@@ -19,4 +19,4 @@ fos_rest:
     jsonp_handler: ~
   format_listener:
     rules:
-      - { path: ^/partner, prefer_extension: true, fallback_format: json, priorities: [ json, html ] }
+      - { path: ^/partner|^/events, prefer_extension: true, fallback_format: json, priorities: [ json, html ] }

@@ -7,6 +7,7 @@ use App\Entity\Partner;
 use App\Repository\Aggregate\PartnerAggregateRepository;
 use App\Repository\Doctrine\PartnerDoctrineRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Prooph\EventSourcing\EventStoreIntegration\AggregateTranslator;
 
 class PartnerRepository
 {
@@ -29,6 +30,11 @@ class PartnerRepository
         $this->aggregateRepository = $aggregateRepository;
         $this->doctrineRepository = $doctrineRepository;
         $this->entityManager = $entityManager;
+    }
+
+    public function getEvents(string $uuid): array
+    {
+        return $this->aggregateRepository->getEvents($uuid);
     }
 
     public function save(Partner $partner)
