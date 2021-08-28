@@ -7,16 +7,17 @@ services:
     app.event_store.default:
         class: Prooph\EventStore\Pdo\PostgresEventStore
         arguments:
-            - '@prooph_event_store.message_factory'
+            - '@app.event_store.message_factory'
             - '@app.event_store.pdo_connection.postgres'
-            - '@app.event_store.mysql.persistence_strategy'
+            - '@app.event_store.postgres.persistence_strategy'
 
-    app.event_store.pdo_connection.mysql:
+    app.event_store.message_factory:
+        class: Prooph\Common\Messaging\FQCNMessageFactory
+
+    app.event_store.pdo_connection.postgres:
         class: \PDO
         arguments:
-            - '%env(MYSQL_DSN)%'
-            - '%env(MYSQL_USER)%'
-            - '%env(MYSQL_PASSWORD)%'
+            - '%env(POSTGRES_DSN)%'
 
-    app.event_store.mysql.persistence_strategy:
-        class: Prooph\EventStore\Pdo\PersistenceStrategy\MySqlSingleStreamStrategy
+    app.event_store.postgres.persistence_strategy:
+        class: Prooph\EventStore\Pdo\PersistenceStrategy\PostgresSingleStreamStrategy

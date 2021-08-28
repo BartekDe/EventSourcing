@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Dto\PartnerDto;
 use App\Entity\Partner;
 use App\Repository\Aggregate\PartnerAggregateRepository;
 use App\Repository\Doctrine\PartnerDoctrineRepository;
@@ -32,14 +33,20 @@ class PartnerRepository
 
     public function save(Partner $partner)
     {
-        $this->saveEntity($partner);
         $this->aggregateRepository->saveAggregateRoot($partner);
+        $this->saveEntity($partner);
     }
 
     private function saveEntity(Partner $partner)
     {
         $this->entityManager->persist($partner);
         $this->entityManager->flush();
+    }
+
+    public function update(Partner $partner, PartnerDto $partnerDto)
+    {
+        $this->entityManager->flush();
+        $this->aggregateRepository->saveAggregateRoot($partner);
     }
 
 }

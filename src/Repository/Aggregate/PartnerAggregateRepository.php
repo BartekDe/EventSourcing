@@ -2,42 +2,32 @@
 
 namespace App\Repository\Aggregate;
 
+use App\Dto\PartnerDto;
 use App\Entity\Partner;
 use Prooph\Common\Event\ProophActionEventEmitter;
 use Prooph\Common\Messaging\FQCNMessageFactory;
 use Prooph\EventSourcing\Aggregate\AggregateRepository;
 use Prooph\EventSourcing\Aggregate\AggregateType;
 use Prooph\EventSourcing\EventStoreIntegration\AggregateTranslator;
+use Prooph\EventSourcing\EventStoreIntegration\ClosureAggregateTranslator;
 use Prooph\EventStore\ActionEventEmitterEventStore;
+use Prooph\EventStore\EventStore;
 use Prooph\EventStore\Pdo\PersistenceStrategy\PostgresSingleStreamStrategy;
 use Prooph\EventStore\Pdo\PostgresEventStore;
 
 class PartnerAggregateRepository extends AggregateRepository
 {
 
-    public $eventStore;
+    protected $eventStore;
 
-    public function __construct()
+    public function __construct(EventStore $eventStore)
     {
-        // TODO: config prooph_pdo_event_store.yaml
-        $eventStore = new ActionEventEmitterEventStore(
-            new PostgresEventStore(
-                new FQCNMessageFactory(),
-                new \PDO('pgsql:host=localhost;port=5432;dbname=partner;user=postgres;password=postgres'),
-                new PostgresSingleStreamStrategy()
-            ),
-            new ProophActionEventEmitter()
-        );
-
         $this->eventStore = $eventStore;
 
         parent::__construct(
             $eventStore,
             AggregateType::fromAggregateRootClass('App\Entity\Partner'),
-            new AggregateTranslator(),
-            null,
-            null,
-            true
+            new ClosureAggregateTranslator()
         );
     }
 
@@ -46,7 +36,7 @@ class PartnerAggregateRepository extends AggregateRepository
         $this->saveAggregateRoot($partner);
     }
 
-    public function get(string $uuid): object
+    public function get(string $uuid): ?object
     {
         return $this->getAggregateRoot($uuid);
     }

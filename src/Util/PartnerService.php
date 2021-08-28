@@ -37,6 +37,8 @@ class PartnerService
     public function updatePartner(Partner $partner, PartnerDto $partnerDto)
     {
         $partner->changeName($partnerDto->name);
+        $partner->changeDescription($partnerDto->description);
+        $this->partnerRepository->update($partner, $partnerDto);
     }
 
 }

@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Event\Partner\PartnerDescriptionChanged;
 use App\Event\Partner\PartnerNameChanged;
 use App\Event\Partner\PartnerWasCreated;
 use App\Repository\Doctrine\PartnerDoctrineRepository;
@@ -48,6 +49,11 @@ class Partner extends AggregateRoot
      */
     private ?\DateTime $creationTime = null;
 
+    /**
+     * @ORM\Column(type="integer")
+     */
+    protected $version;
+
     public static function createNew(
         string  $name,
         string  $description,
@@ -86,6 +92,19 @@ class Partner extends AggregateRoot
         }
     }
 
+    public function changeDescription(string $newDescription)
+    {
+        if ($this->description != $newDescription) {
+            $this->recordThat(PartnerDescriptionChanged::occur(
+                $this->uuid->toString(),
+                [
+                    'newDescription' => $newDescription,
+                    'oldDescription' => $this->description
+                ]
+            ));
+        }
+    }
+
     protected function aggregateId(): string
     {
         return $this->uuid->toString();
@@ -103,6 +122,9 @@ class Partner extends AggregateRoot
                 break;
             case PartnerNameChanged::class:
                 $this->name = $event->newName();
+                break;
+            case PartnerDescriptionChanged::class:
+                $this->description = $event->newDescription();
                 break;
             default:
                 throw new \RuntimeException(sprintf('Unknown event type %s', get_class($event)));
