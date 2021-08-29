@@ -16,7 +16,7 @@ use Ramsey\Uuid\UuidInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @ORM\Entity(repositoryClass=PartnerRepository::class)
+ * @ORM\Entity(repositoryClass=PartnerDoctrineRepository::class)
  */
 class Partner extends AggregateRoot
 {
@@ -120,7 +120,7 @@ class Partner extends AggregateRoot
         }
     }
 
-    public function changeWebpage(string $newWebpage)
+    public function changeWebpage(?string $newWebpage)
     {
         if ($this->webpage != $newWebpage) {
             $this->recordThat(PartnerWebpageChanged::occur(

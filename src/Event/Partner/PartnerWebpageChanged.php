@@ -7,12 +7,12 @@ use Prooph\EventSourcing\AggregateChanged;
 class PartnerWebpageChanged extends AggregateChanged
 {
 
-    public function newWebpage(): string
+    public function newWebpage(): ?string
     {
         return $this->payload()['newWebpage'];
     }
 
-    public function oldWebpage(): string
+    public function oldWebpage(): ?string
     {
         return $this->payload()['oldWebpage'];
     }
